@@ -5,7 +5,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { DateTime } from "luxon";
 import fs from "node:fs";
 import pg from "pg";
-import { createBooking, releaseBooking, SlotUnavailableError } from "../src/bookings.js";
+import { createBooking, listDay, releaseBooking, setPresence, SlotUnavailableError } from "../src/bookings.js";
 import { RestaurantConfig } from "../src/config.js";
 import { createPool, migrate, seedRestaurant } from "../src/db.js";
 
@@ -102,5 +102,21 @@ describe.skipIf(!url)("bookings in the database", () => {
     expect(again.tables).toEqual(made[0].tables);
     const events = await pool.query("SELECT kind FROM booking_event WHERE booking_id = $1 ORDER BY id", [made[0].id]);
     expect(events.rows.map((r) => r.kind)).toEqual(["created", "cancelled"]);
+  });
+
+  it("the day list shows bookings in order, with check-in and departure", async () => {
+    await pool.query("DELETE FROM booking");
+    const late = await createBooking(pool, config, { restaurantId, partySize: 4, start: at(`${FRIDAY}T20:00`), source: "phone", guest: { name: "Nguyen", phone: "5145551002" }, notes: "Anniversaire" });
+    const early = await createBooking(pool, config, { restaurantId, partySize: 2, start: at(`${FRIDAY}T18:00`), source: "online", guest: { name: "Roy", email: "roy@example.com" } });
+    await setPresence(pool, restaurantId, early.id, "seated", "staff");
+    await setPresence(pool, restaurantId, early.id, "completed", "staff");
+    const day = await listDay(pool, restaurantId, at(`${FRIDAY}T00:00`), at("2027-01-16T00:00"));
+    expect(day.map((b) => [b.name, b.status, b.tables])).toEqual([
+      ["Roy", "completed", ["A3"]],
+      ["Nguyen", "confirmed", ["A1", "A2"]],
+    ]);
+    expect(day[1].notes).toBe("Anniversaire");
+    await expect(setPresence(pool, restaurantId, early.id, "seated", "staff")).rejects.toThrow(); // already closed
+    void late;
   });
 });
