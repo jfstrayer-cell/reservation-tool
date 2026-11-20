@@ -1,0 +1,38 @@
+{
+  "name": "reservation-tool",
+  "version": "0.1.0",
+  "description": "Low-cost table-booking tool for small restaurants (pilot: Les Oiseaux de Passage)",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "migrate": "tsx scripts/migrate.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jfstrayer-cell/reservation-tool.git"
+  },
+  "bugs": {
+    "url": "https://github.com/jfstrayer-cell/reservation-tool/issues"
+  },
+  "homepage": "https://github.com/jfstrayer-cell/reservation-tool#readme",
+  "dependencies": {
+    "luxon": "^3.7.2",
+    "pg": "^8.23.1"
+  },
+  "devDependencies": {
+    "@types/luxon": "^3.7.6",
+    "@types/node": "^26.6.6",
+    "@types/pg": "^8.23.1",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vitest": "^5.1.1"
+  },
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  }
+}
