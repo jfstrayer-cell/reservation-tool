@@ -108,9 +108,9 @@ Every confirmation and reminder carries a private link. Until the cut-off, the g
 
 ## 5. Les Oiseaux — pilot configuration
 
-Data given by JF on 20 November 2026. Items marked **(assumed)** need confirmation.
+Data given and confirmed by JF on 20 November 2026.
 
-**Tables (ground floor, 554):** A1 to A12, **2 seats each (assumed)** — 12 tables × 2 = the stated 24-guest capacity.
+**Tables (ground floor, 554):** A1 to A12, **2 seats each** — 12 tables × 2 = the stated 24-guest capacity.
 
 **Combinations:**
 
@@ -118,14 +118,14 @@ Data given by JF on 20 November 2026. Items marked **(assumed)** need confirmati
 |---|---|---|
 | A1 + A2 | 3–4 | |
 | A4 + A5 | 3–4 | |
-| A6 + A7 | 3–4 | **(assumed)** partial use of the A6–A8 group |
-| A7 + A8 | 3–4 | **(assumed)** partial use of the A6–A8 group |
+| A6 + A7 | 3–4 | Partial use of the A6–A8 group |
+| A7 + A8 | 3–4 | Partial use of the A6–A8 group |
 | A6 + A7 + A8 | 5–6 | Largest combination |
 | A9 + A10 | 3–4 | |
 | A11 + A12 | 3–4 | |
 | A3 | 1–2 | Stands alone |
 
-**Opening hours:** Sunday–Thursday 17:00–21:00 · Friday–Saturday 17:00–22:00. Whether 21:00/22:00 is the **last seating** or the **closing time** is to confirm.
+**Opening hours:** Sunday–Thursday 17:00–21:00 · Friday–Saturday 17:00–22:00. 21:00 / 22:00 are **last seating** times (a 21:00 booking holds its table until 23:30).
 
 **Time per table:** 2 h 30 for every party size.
 
@@ -158,8 +158,8 @@ Data given by JF on 20 November 2026. Items marked **(assumed)** need confirmati
 ## 7. Decisions needed
 
 1. ~~Parties of 7–8~~ — decided: online max 6, larger parties go to the group request.
-2. Confirm 2 seats per table, and whether A6+A7 and A7+A8 can be used without A8 or A6.
-3. Is 21:00 / 22:00 the last seating or the closing time? Usual closures (holidays)?
+2. ~~Seats and partial combinations~~ — confirmed.
+3. ~~Last seating~~ — confirmed. Usual closures (holidays)? Can be added any time from the restaurant screen.
 4. Interval, buffer, grace period, cut-off and retention periods (JF / Julian).
 5. Any table kept for walk-ins only?
 

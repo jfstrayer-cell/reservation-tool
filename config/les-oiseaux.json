@@ -15,8 +15,7 @@
         "thu"
       ],
       "opens": "17:00",
-      "lastSeating": "21:00",
-      "_note": "21:00: last seating or closing? to confirm"
+      "lastSeating": "21:00"
     },
     {
       "days": [
@@ -24,8 +23,7 @@
         "sat"
       ],
       "opens": "17:00",
-      "lastSeating": "22:00",
-      "_note": "22:00: last seating or closing? to confirm"
+      "lastSeating": "22:00"
     }
   ],
   "tables": [
@@ -113,8 +111,7 @@
         "A7"
       ],
       "minSeats": 3,
-      "maxSeats": 4,
-      "_note": "assumed"
+      "maxSeats": 4
     },
     {
       "tables": [
@@ -122,8 +119,7 @@
         "A8"
       ],
       "minSeats": 3,
-      "maxSeats": 4,
-      "_note": "assumed"
+      "maxSeats": 4
     },
     {
       "tables": [
