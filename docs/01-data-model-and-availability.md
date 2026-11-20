@@ -129,9 +129,7 @@ Data given by JF on 20 November 2026. Items marked **(assumed)** need confirmati
 
 **Time per table:** 2 h 30 for every party size.
 
-**Maximum party size:** 8.
-
-> ⚠️ **Conflict to resolve:** the largest combination seats 6, so a party of 7 or 8 cannot be seated with the current list. Either add a combination that reaches 8 (for example A9 + A10 + A11 + A12), or set the online maximum to 6 and invite larger parties to contact the restaurant.
+**Maximum party size online:** 6 (decided by JF, 20 Nov. 2026), matching the largest combination (A6 + A7 + A8). For 7 guests or more, the guest page shows no times; it offers the **group request** instead, which leads to the groups workflow (private room 552 or a group at the 554). For the pilot, a group request goes to JF by email; the full groups option comes later.
 
 **Other settings (proposed defaults):**
 
@@ -159,7 +157,7 @@ Data given by JF on 20 November 2026. Items marked **(assumed)** need confirmati
 
 ## 7. Decisions needed
 
-1. Parties of 7–8: add a combination reaching 8, or cap online bookings at 6 (JF / Julian).
+1. ~~Parties of 7–8~~ — decided: online max 6, larger parties go to the group request.
 2. Confirm 2 seats per table, and whether A6+A7 and A7+A8 can be used without A8 or A6.
 3. Is 21:00 / 22:00 the last seating or the closing time? Usual closures (holidays)?
 4. Interval, buffer, grace period, cut-off and retention periods (JF / Julian).

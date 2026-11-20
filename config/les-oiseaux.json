@@ -6,42 +6,169 @@
     "defaultLanguage": "fr-CA"
   },
   "servicePeriods": [
-    { "days": ["sun", "mon", "tue", "wed", "thu"], "opens": "17:00", "lastSeating": "21:00", "_note": "21:00: last seating or closing? to confirm" },
-    { "days": ["fri", "sat"], "opens": "17:00", "lastSeating": "22:00", "_note": "22:00: last seating or closing? to confirm" }
+    {
+      "days": [
+        "sun",
+        "mon",
+        "tue",
+        "wed",
+        "thu"
+      ],
+      "opens": "17:00",
+      "lastSeating": "21:00",
+      "_note": "21:00: last seating or closing? to confirm"
+    },
+    {
+      "days": [
+        "fri",
+        "sat"
+      ],
+      "opens": "17:00",
+      "lastSeating": "22:00",
+      "_note": "22:00: last seating or closing? to confirm"
+    }
   ],
   "tables": [
-    { "label": "A1", "minSeats": 1, "maxSeats": 2 },
-    { "label": "A2", "minSeats": 1, "maxSeats": 2 },
-    { "label": "A3", "minSeats": 1, "maxSeats": 2 },
-    { "label": "A4", "minSeats": 1, "maxSeats": 2 },
-    { "label": "A5", "minSeats": 1, "maxSeats": 2 },
-    { "label": "A6", "minSeats": 1, "maxSeats": 2 },
-    { "label": "A7", "minSeats": 1, "maxSeats": 2 },
-    { "label": "A8", "minSeats": 1, "maxSeats": 2 },
-    { "label": "A9", "minSeats": 1, "maxSeats": 2 },
-    { "label": "A10", "minSeats": 1, "maxSeats": 2 },
-    { "label": "A11", "minSeats": 1, "maxSeats": 2 },
-    { "label": "A12", "minSeats": 1, "maxSeats": 2 }
+    {
+      "label": "A1",
+      "minSeats": 1,
+      "maxSeats": 2
+    },
+    {
+      "label": "A2",
+      "minSeats": 1,
+      "maxSeats": 2
+    },
+    {
+      "label": "A3",
+      "minSeats": 1,
+      "maxSeats": 2
+    },
+    {
+      "label": "A4",
+      "minSeats": 1,
+      "maxSeats": 2
+    },
+    {
+      "label": "A5",
+      "minSeats": 1,
+      "maxSeats": 2
+    },
+    {
+      "label": "A6",
+      "minSeats": 1,
+      "maxSeats": 2
+    },
+    {
+      "label": "A7",
+      "minSeats": 1,
+      "maxSeats": 2
+    },
+    {
+      "label": "A8",
+      "minSeats": 1,
+      "maxSeats": 2
+    },
+    {
+      "label": "A9",
+      "minSeats": 1,
+      "maxSeats": 2
+    },
+    {
+      "label": "A10",
+      "minSeats": 1,
+      "maxSeats": 2
+    },
+    {
+      "label": "A11",
+      "minSeats": 1,
+      "maxSeats": 2
+    },
+    {
+      "label": "A12",
+      "minSeats": 1,
+      "maxSeats": 2
+    }
   ],
   "combinations": [
-    { "tables": ["A1", "A2"], "minSeats": 3, "maxSeats": 4 },
-    { "tables": ["A4", "A5"], "minSeats": 3, "maxSeats": 4 },
-    { "tables": ["A6", "A7"], "minSeats": 3, "maxSeats": 4, "_note": "assumed" },
-    { "tables": ["A7", "A8"], "minSeats": 3, "maxSeats": 4, "_note": "assumed" },
-    { "tables": ["A6", "A7", "A8"], "minSeats": 5, "maxSeats": 6 },
-    { "tables": ["A9", "A10"], "minSeats": 3, "maxSeats": 4 },
-    { "tables": ["A11", "A12"], "minSeats": 3, "maxSeats": 4 }
+    {
+      "tables": [
+        "A1",
+        "A2"
+      ],
+      "minSeats": 3,
+      "maxSeats": 4
+    },
+    {
+      "tables": [
+        "A4",
+        "A5"
+      ],
+      "minSeats": 3,
+      "maxSeats": 4
+    },
+    {
+      "tables": [
+        "A6",
+        "A7"
+      ],
+      "minSeats": 3,
+      "maxSeats": 4,
+      "_note": "assumed"
+    },
+    {
+      "tables": [
+        "A7",
+        "A8"
+      ],
+      "minSeats": 3,
+      "maxSeats": 4,
+      "_note": "assumed"
+    },
+    {
+      "tables": [
+        "A6",
+        "A7",
+        "A8"
+      ],
+      "minSeats": 5,
+      "maxSeats": 6
+    },
+    {
+      "tables": [
+        "A9",
+        "A10"
+      ],
+      "minSeats": 3,
+      "maxSeats": 4
+    },
+    {
+      "tables": [
+        "A11",
+        "A12"
+      ],
+      "minSeats": 3,
+      "maxSeats": 4
+    }
   ],
-  "turnTimeMinutes": { "default": 150 },
+  "turnTimeMinutes": {
+    "default": 150
+  },
   "settings": {
-    "maxPartySizeOnline": 8,
-    "_maxPartyNote": "largest combination seats 6: resolve before launch",
+    "maxPartySizeOnline": 6,
     "slotIntervalMinutes": 15,
     "bufferMinutes": 10,
     "onlineCutoffMinutes": 30,
     "lateGraceMinutes": 15,
     "pacingLimitPer15Min": null,
-    "remindersHoursBefore": [24, 3],
-    "reviewRequestHoursAfter": 2
+    "remindersHoursBefore": [
+      24,
+      3
+    ],
+    "reviewRequestHoursAfter": 2,
+    "largerPartiesRedirect": {
+      "type": "group_request",
+      "_note": "7+ guests: guest page shows the group request option (private room 552 / groups workflow) instead of times"
+    }
   }
 }
