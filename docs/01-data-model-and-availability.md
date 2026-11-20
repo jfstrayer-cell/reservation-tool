@@ -106,22 +106,46 @@ Every confirmation and reminder carries a private link. Until the cut-off, the g
 
 ---
 
-## 5. Restaurant settings (with proposed defaults for Les Oiseaux)
+## 5. Les Oiseaux — pilot configuration
+
+Data given by JF on 20 November 2026. Items marked **(assumed)** need confirmation.
+
+**Tables (ground floor, 554):** A1 to A12, **2 seats each (assumed)** — 12 tables × 2 = the stated 24-guest capacity.
+
+**Combinations:**
+
+| Combination | Seats | Note |
+|---|---|---|
+| A1 + A2 | 3–4 | |
+| A4 + A5 | 3–4 | |
+| A6 + A7 | 3–4 | **(assumed)** partial use of the A6–A8 group |
+| A7 + A8 | 3–4 | **(assumed)** partial use of the A6–A8 group |
+| A6 + A7 + A8 | 5–6 | Largest combination |
+| A9 + A10 | 3–4 | |
+| A11 + A12 | 3–4 | |
+| A3 | 1–2 | Stands alone |
+
+**Opening hours:** Sunday–Thursday 17:00–21:00 · Friday–Saturday 17:00–22:00. Whether 21:00/22:00 is the **last seating** or the **closing time** is to confirm.
+
+**Time per table:** 2 h 30 for every party size.
+
+**Maximum party size:** 8.
+
+> ⚠️ **Conflict to resolve:** the largest combination seats 6, so a party of 7 or 8 cannot be seated with the current list. Either add a combination that reaches 8 (for example A9 + A10 + A11 + A12), or set the online maximum to 6 and invite larger parties to contact the restaurant.
+
+**Other settings (proposed defaults):**
 
 | Setting | Proposed default | To confirm with |
 |---|---|---|
 | Interval between start times | 15 min | Julian |
-| Turn time by party size | 1–2: 90 min · 3–4: 105 · 5–6: 120 · 7–8: 135 | Julian |
 | Buffer between bookings on a table | 10 min | Julian |
-| Last seating | 30 min before kitchen closes | Guillaume |
-| Maximum party size online | 8 (larger → contact the restaurant) | JF |
 | Online cut-off | 30 min before | JF |
 | Grace period before "late" | 15 min | Julian |
 | Pacing limit | none at first | Guillaume |
 | Reminders | 24 h before (email) and 3 h before (email, text later) | JF |
 | Review request | 2 h after completed, every guest who came | JF |
 
----
+**What 2 h 30 means in practice:** each table turns at most about twice a night (e.g. 17:00 and 19:40 with the buffer). On a Friday the room can take roughly 24 guests at the first seating and 24 at the second, about 48 covers at most. That is a business choice, not a technical one; a shorter time for parties of 2 (e.g. 2 h) would add a third possible start on long nights.
 
 ## 6. Privacy and retention (Law 25)
 
@@ -135,9 +159,10 @@ Every confirmation and reminder carries a private link. Until the cut-off, the g
 
 ## 7. Decisions needed
 
-1. Turn times, interval, buffer and grace period above (Julian).
-2. Les Oiseaux's real table list: label, seats, which can be combined, any walk-in-only tables (Julian).
-3. Service periods and usual closures (Julian / Guillaume).
-4. Maximum party size online, cut-off, and retention periods (JF).
+1. Parties of 7–8: add a combination reaching 8, or cap online bookings at 6 (JF / Julian).
+2. Confirm 2 seats per table, and whether A6+A7 and A7+A8 can be used without A8 or A6.
+3. Is 21:00 / 22:00 the last seating or the closing time? Usual closures (holidays)?
+4. Interval, buffer, grace period, cut-off and retention periods (JF / Julian).
+5. Any table kept for walk-ins only?
 
 Once these are confirmed, Phase 1 code starts: the schema, the availability engine and the tests, including the "200 simultaneous booking attempts, zero double bookings" test.
