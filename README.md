@@ -12,6 +12,8 @@ Pilot: **Les Oiseaux de Passage**, Montréal. A Mixed-Methods project.
 | `db/migrations/` | PostgreSQL schema, including the no-double-booking constraint |
 | `src/availability.ts` | Availability engine (pure functions) |
 | `src/bookings.ts` | Creating and releasing bookings safely |
+| `app/staff/` | Restaurant screen (French): day view, check-in, walk-ins, phone bookings |
+| `app/api/staff/` | Staff API used by the screen (and later by AI assistants) |
 | `tests/` | Engine tests and database tests (200 simultaneous bookings) |
 
 ## Running the tests
@@ -23,6 +25,14 @@ DATABASE_URL=postgres://… npm test         # + database tests (PostgreSQL 16)
 ```
 
 Every pull request runs the full suite automatically (GitHub Actions).
+
+## Running the restaurant screen locally
+
+```bash
+cp .env.example .env.local   # set DATABASE_URL, STAFF_PIN, SESSION_SECRET
+npm run seed                 # creates the tables and loads config/les-oiseaux.json
+npm run dev                  # http://localhost:3000/staff
+```
 
 ## Stack
 

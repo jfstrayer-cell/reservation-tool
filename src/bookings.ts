@@ -132,3 +132,73 @@ export async function releaseBooking(
     client.release();
   }
 }
+
+/** Marks a guest as arrived (seated) or gone (completed). Tables stay held. */
+export async function setPresence(
+  pool: pg.Pool,
+  restaurantId: string,
+  bookingId: string,
+  status: "seated" | "completed",
+  actor: string,
+): Promise<void> {
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    const res = await client.query(
+      "UPDATE booking SET status = $3, updated_at = now() WHERE id = $1 AND restaurant_id = $2 AND status IN ('confirmed','late','seated')",
+      [bookingId, restaurantId, status],
+    );
+    if (res.rowCount === 0) throw new Error("Booking not found or already closed");
+    await client.query("INSERT INTO booking_event (booking_id, restaurant_id, kind, actor) VALUES ($1,$2,$3,$4)", [bookingId, restaurantId, status, actor]);
+    await client.query("COMMIT");
+  } catch (e) {
+    await client.query("ROLLBACK");
+    throw e;
+  } finally {
+    client.release();
+  }
+}
+
+export interface DayBooking {
+  id: string;
+  start: string; // ISO
+  end: string;   // ISO
+  partySize: number;
+  status: "confirmed" | "late" | "seated" | "completed" | "no_show" | "cancelled";
+  source: string;
+  name: string | null;
+  phone: string | null;
+  email: string | null;
+  notes: string | null;
+  tables: string[];
+}
+
+/** All bookings starting on a local date, sorted by time. */
+export async function listDay(pool: pg.Pool, restaurantId: string, from: Date, to: Date): Promise<DayBooking[]> {
+  const { rows } = await pool.query(
+    `SELECT b.id, b.starts_at, b.ends_at, b.party_size, b.status, b.source, b.notes,
+            g.name, g.phone, g.email,
+            coalesce(array_agg(t.label ORDER BY t.label) FILTER (WHERE t.label IS NOT NULL), '{}') AS tables
+       FROM booking b
+       LEFT JOIN guest g ON g.id = b.guest_id
+       LEFT JOIN booking_table bt ON bt.booking_id = b.id
+       LEFT JOIN dining_table t ON t.id = bt.table_id
+      WHERE b.restaurant_id = $1 AND b.starts_at >= $2 AND b.starts_at < $3
+      GROUP BY b.id, g.id
+      ORDER BY b.starts_at, b.created_at`,
+    [restaurantId, from, to],
+  );
+  return rows.map((r) => ({
+    id: r.id,
+    start: r.starts_at.toISOString(),
+    end: r.ends_at.toISOString(),
+    partySize: r.party_size,
+    status: r.status,
+    source: r.source,
+    name: r.name,
+    phone: r.phone,
+    email: r.email,
+    notes: r.notes,
+    tables: [...r.tables].sort((a: string, b: string) => a.localeCompare(b, "en", { numeric: true })),
+  }));
+}

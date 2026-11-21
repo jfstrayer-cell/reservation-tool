@@ -51,8 +51,17 @@ export function candidatesFor(config: RestaurantConfig, partySize: number, chann
     .map((c) => ({ tables: [...c.tables], minSeats: c.minSeats, maxSeats: c.maxSeats }))
     .filter((c) => fits(c) && usable(c.tables));
 
+  // How many combinations each table belongs to: tables shared by several combinations
+  // (like A7) are kept for the parties that need them, so they're used last.
+  const sharedness = new Map<string, number>();
+  for (const c of config.combinations) for (const t of c.tables) sharedness.set(t, (sharedness.get(t) ?? 0) + 1);
+  const flex = (c: Candidate) => c.tables.reduce((n, t) => n + (sharedness.get(t) ?? 0), 0);
+
   const order = (a: Candidate, b: Candidate) =>
-    a.maxSeats - b.maxSeats || a.tables.length - b.tables.length || a.tables.join().localeCompare(b.tables.join(), "en", { numeric: true });
+    a.maxSeats - b.maxSeats ||
+    a.tables.length - b.tables.length ||
+    flex(a) - flex(b) ||
+    a.tables.join().localeCompare(b.tables.join(), "en", { numeric: true });
   return [...singles.sort(order), ...combos.sort(order)];
 }
 

@@ -56,8 +56,8 @@ describe("party size and table choice", () => {
     expect(findSlots(config, FRIDAY, 7, [], LONG_BEFORE)).toEqual({ kind: "group_request", reason: "party_too_large" });
   });
 
-  it("a party of 2 gets a single table, never a combination", () => {
-    expect(slots(FRIDAY, 2)[0].tables).toEqual(["A1"]);
+  it("a party of 2 gets a single table, starting with A3, which can't be combined anyway", () => {
+    expect(slots(FRIDAY, 2)[0].tables).toEqual(["A3"]);
   });
 
   it("a party of 3 or 4 gets the smallest 4-seat combination", () => {
@@ -73,6 +73,11 @@ describe("party size and table choice", () => {
   it("when A1 is taken, a party of 4 moves to the next combination", () => {
     const holds: Hold[] = [{ table: "A1", start: at(`${FRIDAY}T17:00`), heldUntil: at(`${FRIDAY}T19:40`) }];
     expect(slots(FRIDAY, 4, holds)[0].tables).toEqual(["A4", "A5"]);
+  });
+
+  it("tables shared by several combinations (A6–A8) are kept for parties that need them", () => {
+    const busy = ["A1", "A2", "A4", "A5"].map((table) => ({ table, start: at(`${FRIDAY}T17:00`), heldUntil: at(`${FRIDAY}T23:00`) }));
+    expect(slots(FRIDAY, 4, busy)[0].tables).toEqual(["A9", "A10"]);
   });
 
   it("a party of 6 has no time when A7 is taken", () => {
