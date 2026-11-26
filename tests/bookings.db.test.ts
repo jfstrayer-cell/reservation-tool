@@ -8,6 +8,7 @@ import pg from "pg";
 import { createBooking, listDay, releaseBooking, setPresence, SlotUnavailableError } from "../src/bookings.js";
 import { RestaurantConfig } from "../src/config.js";
 import { createPool, migrate, seedRestaurant } from "../src/db.js";
+import { createGroupRequest, listGroupRequests, markGroupRequest, validateGroupRequest } from "../src/groups.js";
 
 const url = process.env.DATABASE_URL;
 const config: RestaurantConfig = JSON.parse(fs.readFileSync("config/les-oiseaux.json", "utf8"));
@@ -125,5 +126,16 @@ describe.skipIf(!url)("bookings in the database", () => {
     const { rows } = await pool.query("SELECT g.name, g.phone, g.email FROM booking b JOIN guest g ON g.id = b.guest_id WHERE b.id = $1", [b.id]);
     expect(rows[0]).toEqual({ name: "Sophie", phone: null, email: null });
     await expect(pool.query("INSERT INTO guest (restaurant_id, name) VALUES ($1, '  ')", [restaurantId])).rejects.toThrow();
+  });
+
+  it("a group request is stored with its Registre ID and can be marked as handled", async () => {
+    const v = validateGroupRequest({ eventDate: "2027-03-12", guestsMin: 20, eventFormat: "souper", drinks: "service", contactName: "Camille Roy", email: "c@exemple.ca", consent: true }, { today: "2027-01-10", zone: "America/Toronto" });
+    const made = await createGroupRequest(pool, restaurantId, v.value!);
+    expect(made.registreId).toBe("2027-03-12-ROY");
+    let list = await listGroupRequests(pool, restaurantId);
+    expect(list[0]).toMatchObject({ contactName: "Camille Roy", guestsMin: 20, guestsMax: 20, status: "demande", drinks: "service" });
+    await markGroupRequest(pool, restaurantId, made.id, "traitee", "staff");
+    list = await listGroupRequests(pool, restaurantId);
+    expect(list[0].status).toBe("traitee");
   });
 });
