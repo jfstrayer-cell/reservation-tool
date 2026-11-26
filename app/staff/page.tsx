@@ -17,7 +17,7 @@ export default async function StaffPage() {
     lateBadgeMinutes: s.lateBadgeMinutes,
     noShowPromptMinutes: s.noShowPromptMinutes,
     maxPartySize: (redirectTo?.minPartySize ?? 11) - 1,
-    groupUrl: redirectTo?.url ?? (redirectTo?.fallbackEmail ? `mailto:${redirectTo.fallbackEmail}?subject=${encodeURIComponent("Demande de groupe — salle privée du 552")}` : null),
+    groupUrl: "/staff/groupes/nouvelle",
   };
   return <StaffDay today={todayIn(settings.timeZone)} settings={settings} />;
 }

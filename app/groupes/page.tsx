@@ -12,8 +12,8 @@ export default async function GroupsPage() {
       {r.config.brand?.logo && <img className="logo g-logo" src={r.config.brand.logo} alt={r.config.restaurant.name} />}
       <h1>Groupes et salle privée</h1>
       <p className="g-intro">
-        Pour les groupes de plus de 10 personnes, notre salle privée du 552, avenue Duluth Est, accueille jusqu’à 40 convives,
-        servis par la cuisine du restaurant. Décrivez votre événement : nous vous répondons avec une offre complète.
+        Notre salle privée du 552, avenue Duluth Est, reçoit les groupes de 11 à 40 convives : soupers, cocktails dînatoires,
+        réceptions avec votre traiteur, concerts. Parlez-nous de votre événement ; nous vous revenons avec une offre complète.
       </p>
       <GroupForm today={todayIn(r.config.restaurant.timeZone)} />
       <p className="g-foot muted">Les Oiseaux de Passage · 554–552, avenue Duluth Est, Montréal · 514 849-8844</p>

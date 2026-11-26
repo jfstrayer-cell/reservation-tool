@@ -112,6 +112,7 @@ export default function StaffDay({ today, settings }: { today: string; settings:
       <div className="actions">
         <button className="primary" onClick={() => setPanel(panel === "walkin" ? "none" : "walkin")}>+ Sans réservation</button>
         <button className="primary" onClick={() => setPanel(panel === "phone" ? "none" : "phone")}>+ Réservation tél.</button>
+        <a className="primary as-button" href="/staff/groupes/nouvelle">+ Groupe (11+)</a>
       </div>
 
       {panel === "walkin" && <WalkIn sizes={sizes} groupUrl={settings.groupUrl} onDone={() => { setPanel("none"); if (date !== today) setDate(today); else load(); }} onError={setError} />}
@@ -221,7 +222,7 @@ function PartyPicker({ sizes, value, onPick, onGroup }: { sizes: number[]; value
 function GroupNotice({ groupUrl, max }: { groupUrl: string | null; max: number }) {
   return (
     <div className="group-notice">
-      Groupes de plus de {max} personnes : {groupUrl ? <a href={groupUrl} target="_blank" rel="noreferrer">demande de groupe</a> : "demande de groupe"}
+      Groupes de plus de {max} personnes : {groupUrl ? <a href={groupUrl}>demande de groupe</a> : "demande de groupe"}
     </div>
   );
 }
@@ -289,7 +290,11 @@ function PhoneBooking({ initialDate, today, sizes, groupUrl, time, onDone, onErr
     <form className="panel" onSubmit={save}>
       <h2>Réservation par téléphone</h2>
       <label className="step" htmlFor="booking-date">Date</label>
-      <input id="booking-date" type="date" className="date" min={today} value={date} onChange={(e) => e.target.value && setDate(e.target.value)} />
+      <div className="times">
+        <button type="button" className={date === today ? "chip on" : "chip"} onClick={() => setDate(today)}>Ce soir</button>
+        <button type="button" className={date === addDays(today, 1) ? "chip on" : "chip"} onClick={() => setDate(addDays(today, 1))}>Demain</button>
+        <input id="booking-date" type="date" className="date" min={today} value={date} onChange={(e) => e.target.value && setDate(e.target.value)} />
+      </div>
       <label className="step">Personnes</label>
       <PartyPicker sizes={sizes} value={party} onPick={(n) => { setGroup(false); setParty(n); }} onGroup={() => { setParty(null); setGroup(true); }} />
       {group && <GroupNotice groupUrl={groupUrl} max={sizes.length} />}

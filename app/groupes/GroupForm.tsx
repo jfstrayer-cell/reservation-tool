@@ -11,7 +11,8 @@ const OPTIONS: [string, string][] = [
   ["plan_de_table", "Plan de table particulier"],
 ];
 
-export default function GroupForm({ today }: { today: string }) {
+export default function GroupForm({ today, mode = "guest" }: { today: string; mode?: "guest" | "staff" }) {
+  const staff = mode === "staff";
   const [f, setF] = useState({
     eventDate: "", alternateDate: "", arrivalTime: "18:30", guestsMin: "", guestsMax: "", occasion: "",
     eventFormat: "souper", drinks: "", dietaryNotes: "", message: "", contactName: "", organisation: "", email: "", phone: "", website: "",
@@ -30,7 +31,7 @@ export default function GroupForm({ today }: { today: string }) {
     e.preventDefault();
     setBusy(true);
     setFailure(null);
-    const res = await fetch("/api/groups", {
+    const res = await fetch(staff ? "/api/staff/groups" : "/api/groups", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ ...f, guestsMin: Number(f.guestsMin), guestsMax: f.guestsMax ? Number(f.guestsMax) : undefined, options, consent }),
@@ -50,11 +51,11 @@ export default function GroupForm({ today }: { today: string }) {
   if (done) {
     return (
       <section className="g-card g-done">
-        <h2>Merci, votre demande est bien reçue.</h2>
-        <p>Nous vous répondons par courriel avec une offre complète d’ici 48 heures : disponibilité, menu et estimé.</p>
+        <h2>{staff ? "Demande de groupe enregistrée." : "Merci, votre demande est bien reçue."}</h2>
+        <p>{staff ? "Elle apparaît dans les demandes de groupe. Vous pouvez dire au client qu’il recevra une offre complète d’ici 48 heures." : "Nous vous répondons par courriel avec une offre complète d’ici 48 heures : disponibilité, menu et estimé."}</p>
         {done.notices.map((n) => <p key={n} className="g-notice">{n}</p>)}
         {done.reference && <p className="muted">Référence : {done.reference}</p>}
-        <p className="muted">Une question d’ici là ? 514 849-8844 · info@lesoiseaux.ca</p>
+        {staff ? <p><a href="/staff/groupes">Voir les demandes de groupe</a> · <a href="/staff">Retour aux réservations</a></p> : <p className="muted">Une question d’ici là ? 514 849-8844 · info@lesoiseaux.ca</p>}
       </section>
     );
   }
@@ -83,7 +84,7 @@ export default function GroupForm({ today }: { today: string }) {
       <fieldset>
         <legend>Formule</legend>
         <div className="g-choices">
-          {[["souper", "Souper servi à table"], ["cocktail", "Cocktail dînatoire (bouchées)"], ["autre", "Autre, à préciser"]].map(([v, l]) => (
+          {[["souper", "Souper servi à table"], ["cocktail", "Cocktail dînatoire (bouchées)"], ["traiteur", "Avec votre traiteur"], ["concert", "Concert"], ["autre", "Autre"]].map(([v, l]) => (
             <label key={v} className={f.eventFormat === v ? "g-choice on" : "g-choice"}><input type="radio" name="format" checked={f.eventFormat === v} onChange={() => setF({ ...f, eventFormat: v })} />{l}</label>
           ))}
         </div>
@@ -108,27 +109,27 @@ export default function GroupForm({ today }: { today: string }) {
       </fieldset>
 
       <fieldset>
-        <legend>Vos coordonnées</legend>
+        <legend>{staff ? "Coordonnées du client" : "Vos coordonnées"}</legend>
         <div className="g-row">
           <label>Nom<input autoComplete="name" value={f.contactName} onChange={set("contactName")} required />{err("contactName")}</label>
           <label><span>Organisme <small>(facultatif)</small></span><input autoComplete="organization" value={f.organisation} onChange={set("organisation")} /></label>
         </div>
         <div className="g-row">
-          <label>Courriel<input type="email" autoComplete="email" value={f.email} onChange={set("email")} required />{err("email")}</label>
-          <label><span>Téléphone <small>(facultatif)</small></span><input type="tel" autoComplete="tel" value={f.phone} onChange={set("phone")} /></label>
+          <label><span>Courriel {staff && <small>(ou téléphone)</small>}</span><input type="email" autoComplete="email" value={f.email} onChange={set("email")} required />{err("email")}</label>
+          <label><span>Téléphone <small>{staff ? "(ou courriel)" : "(facultatif)"}</small></span><input type="tel" autoComplete="tel" value={f.phone} onChange={set("phone")} />{err("phone")}</label>
         </div>
         <input className="g-hp" tabIndex={-1} autoComplete="off" aria-hidden="true" value={f.website} onChange={set("website")} placeholder="Site web" />
         <label className="g-check g-consent">
           <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} />
-          J’accepte que Les Oiseaux de Passage utilisent ces renseignements pour répondre à ma demande. Ils ne servent à rien d’autre.
+          {staff ? "Le client accepte d’être recontacté pour cette demande." : "J’accepte que Les Oiseaux de Passage utilisent ces renseignements pour répondre à ma demande."}
         </label>
         {err("consent")}
       </fieldset>
 
       {failure && <div className="error" role="alert">{failure}</div>}
       {Object.keys(errors).length > 0 && <div className="error" role="alert">Quelques champs sont à corriger.</div>}
-      <button className="primary g-submit" disabled={busy}>{busy ? "Envoi…" : "Envoyer ma demande"}</button>
-      <p className="g-help center">Réponse complète par courriel d’ici 48 heures.</p>
+      <button className="primary g-submit" disabled={busy}>{busy ? "Envoi…" : staff ? "Enregistrer la demande" : "Envoyer ma demande"}</button>
+      {!staff && <p className="g-help center">Réponse complète par courriel d’ici 48 heures.</p>}
     </form>
   );
 }

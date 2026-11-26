@@ -11,7 +11,7 @@ CREATE TABLE group_request (
   guests_min     smallint NOT NULL CHECK (guests_min >= 1),
   guests_max     smallint NOT NULL CHECK (guests_max >= guests_min),
   occasion       text,
-  event_format   text NOT NULL CHECK (event_format IN ('souper', 'cocktail', 'autre')),
+  event_format   text NOT NULL CHECK (event_format IN ('souper', 'cocktail', 'traiteur', 'concert', 'autre')),
   drinks         text NOT NULL CHECK (drinks IN ('apportez', 'service', 'a_discuter')),
   options        text[] NOT NULL DEFAULT '{}',
   dietary_notes  text,
@@ -22,7 +22,7 @@ CREATE TABLE group_request (
   phone          text,
   language       text NOT NULL DEFAULT 'fr',
   consent        boolean NOT NULL,
-  source         text NOT NULL DEFAULT 'formulaire web',
+  source         text NOT NULL DEFAULT 'formulaire web',  -- or 'téléphone (personnel)'
   created_at     timestamptz NOT NULL DEFAULT now(),
   handled_at     timestamptz,
   handled_by     text

@@ -25,7 +25,7 @@ export interface GroupRequestInput {
   guestsMin: number;
   guestsMax?: number;
   occasion?: string;
-  eventFormat: "souper" | "cocktail" | "autre";
+  eventFormat: "souper" | "cocktail" | "traiteur" | "concert" | "autre";
   drinks: "apportez" | "service" | "a_discuter";
   options?: string[];
   dietaryNotes?: string;
@@ -49,7 +49,7 @@ export interface ValidationResult {
 const clean = (v: unknown, max: number) => (typeof v === "string" ? v.trim().replace(/\s+/g, " ").slice(0, max) : "");
 const cleanLong = (v: unknown, max: number) => (typeof v === "string" ? v.trim().slice(0, max) : "");
 
-export function validateGroupRequest(raw: Record<string, unknown>, opts: { today: string; zone: string }): ValidationResult {
+export function validateGroupRequest(raw: Record<string, unknown>, opts: { today: string; zone: string; staff?: boolean }): ValidationResult {
   const errors: Record<string, string> = {};
   const notices: string[] = [];
 
@@ -76,7 +76,7 @@ export function validateGroupRequest(raw: Record<string, unknown>, opts: { today
   }
 
   const eventFormat = clean(raw.eventFormat, 20) as GroupRequestInput["eventFormat"];
-  if (!["souper", "cocktail", "autre"].includes(eventFormat)) errors.eventFormat = "Choisissez le type d'événement.";
+  if (!["souper", "cocktail", "traiteur", "concert", "autre"].includes(eventFormat)) errors.eventFormat = "Choisissez le type d'événement.";
 
   const drinks = clean(raw.drinks, 20) as GroupRequestInput["drinks"];
   if (!["apportez", "service", "a_discuter"].includes(drinks)) errors.drinks = "Choisissez une option pour les boissons.";
@@ -86,9 +86,17 @@ export function validateGroupRequest(raw: Record<string, unknown>, opts: { today
   const contactName = clean(raw.contactName, 120);
   if (!contactName) errors.contactName = "Votre nom est requis.";
   const email = clean(raw.email, 200).toLowerCase();
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errors.email = "Un courriel valide est requis pour vous envoyer notre offre.";
   const phone = clean(raw.phone, 40);
-  if (raw.consent !== true) errors.consent = "Votre accord est nécessaire pour que nous puissions vous répondre.";
+  const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  if (opts.staff) {
+    // Taken on the phone: a phone number is enough; the offer can be sent once an email is known.
+    if (email && !emailOk) errors.email = "Courriel invalide.";
+    if (!email && !phone) errors.phone = "Un téléphone ou un courriel est nécessaire pour revenir au client.";
+    if (raw.consent !== true) errors.consent = "Confirmez que le client accepte d'être recontacté.";
+  } else {
+    if (!emailOk) errors.email = "Un courriel valide est requis pour vous envoyer notre offre.";
+    if (raw.consent !== true) errors.consent = "Votre accord est nécessaire pour que nous puissions vous répondre.";
+  }
 
   if (d.isValid && !errors.eventDate) {
     const months = d.diff(DateTime.fromISO(opts.today, { zone: opts.zone }), "months").months;
@@ -130,15 +138,15 @@ export function registreId(eventDate: string, contactName: string): string {
   return `${eventDate}-${(last + "XXX").slice(0, 3)}`;
 }
 
-export async function createGroupRequest(pool: pg.Pool, restaurantId: string, v: NonNullable<ValidationResult["value"]>) {
+export async function createGroupRequest(pool: pg.Pool, restaurantId: string, v: NonNullable<ValidationResult["value"]>, source = "formulaire web") {
   const { rows } = await pool.query<{ id: string; registre_id: string }>(
     `INSERT INTO group_request (restaurant_id, registre_id, event_date, alternate_date, arrival_time, guests_min, guests_max,
-       occasion, event_format, drinks, options, dietary_notes, message, contact_name, organisation, email, phone, language, consent)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19)
+       occasion, event_format, drinks, options, dietary_notes, message, contact_name, organisation, email, phone, language, consent, source)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20)
      RETURNING id, registre_id`,
     [restaurantId, registreId(v.eventDate, v.contactName), v.eventDate, v.alternateDate ?? null, v.arrivalTime ?? null, v.guestsMin, v.guestsMax,
       v.occasion ?? null, v.eventFormat, v.drinks, v.options, v.dietaryNotes ?? null, v.message ?? null, v.contactName, v.organisation ?? null,
-      v.email, v.phone ?? null, v.language ?? "fr", v.consent],
+      v.email ?? "", v.phone ?? null, v.language ?? "fr", v.consent, source],
   );
   return { id: rows[0].id, registreId: rows[0].registre_id };
 }
@@ -147,14 +155,14 @@ export interface GroupRequestRow {
   id: string; registreId: string; status: string; eventDate: string; alternateDate: string | null; arrivalTime: string | null;
   guestsMin: number; guestsMax: number; occasion: string | null; eventFormat: string; drinks: string; options: string[];
   dietaryNotes: string | null; message: string | null; contactName: string; organisation: string | null; email: string;
-  phone: string | null; language: string; createdAt: string; handledAt: string | null;
+  phone: string | null; language: string; source: string; createdAt: string; handledAt: string | null;
 }
 
 export async function listGroupRequests(pool: pg.Pool, restaurantId: string): Promise<GroupRequestRow[]> {
   const { rows } = await pool.query(
     `SELECT id, registre_id, status, to_char(event_date, 'YYYY-MM-DD') AS event_date, to_char(alternate_date, 'YYYY-MM-DD') AS alternate_date,
             to_char(arrival_time, 'HH24:MI') AS arrival_time, guests_min, guests_max, occasion, event_format, drinks, options, dietary_notes,
-            message, contact_name, organisation, email, phone, language, created_at, handled_at
+            message, contact_name, organisation, email, phone, language, source, created_at, handled_at
        FROM group_request WHERE restaurant_id = $1 AND status <> 'archivee'
       ORDER BY (status = 'demande') DESC, created_at DESC LIMIT 200`,
     [restaurantId],
@@ -163,7 +171,7 @@ export async function listGroupRequests(pool: pg.Pool, restaurantId: string): Pr
     id: r.id, registreId: r.registre_id, status: r.status, eventDate: r.event_date, alternateDate: r.alternate_date, arrivalTime: r.arrival_time,
     guestsMin: r.guests_min, guestsMax: r.guests_max, occasion: r.occasion, eventFormat: r.event_format, drinks: r.drinks, options: r.options,
     dietaryNotes: r.dietary_notes, message: r.message, contactName: r.contact_name, organisation: r.organisation, email: r.email,
-    phone: r.phone, language: r.language, createdAt: r.created_at.toISOString(), handledAt: r.handled_at ? r.handled_at.toISOString() : null,
+    phone: r.phone, language: r.language, source: r.source, createdAt: r.created_at.toISOString(), handledAt: r.handled_at ? r.handled_at.toISOString() : null,
   }));
 }
 
