@@ -1,13 +1,23 @@
 import { redirect } from "next/navigation";
 import { isStaff } from "../../src/server/auth";
 import { getRestaurant, todayIn } from "../../src/server/context";
-import StaffDay from "./StaffDay";
+import StaffDay, { StaffSettings } from "./StaffDay";
 
 export const dynamic = "force-dynamic";
 
 export default async function StaffPage() {
   if (!(await isStaff())) redirect("/staff/login");
   const r = await getRestaurant();
-  const zone = r.config.restaurant.timeZone;
-  return <StaffDay today={todayIn(zone)} timeZone={zone} />;
+  const s = r.config.settings;
+  const redirectTo = s.largerPartiesRedirect;
+  const settings: StaffSettings = {
+    timeZone: r.config.restaurant.timeZone,
+    restaurantName: r.config.restaurant.name,
+    logo: r.config.brand?.logo ?? null,
+    lateBadgeMinutes: s.lateBadgeMinutes,
+    noShowPromptMinutes: s.noShowPromptMinutes,
+    maxPartySize: (redirectTo?.minPartySize ?? 11) - 1,
+    groupUrl: redirectTo?.url ?? (redirectTo?.fallbackEmail ? `mailto:${redirectTo.fallbackEmail}?subject=${encodeURIComponent("Demande de groupe — salle privée du 552")}` : null),
+  };
+  return <StaffDay today={todayIn(settings.timeZone)} settings={settings} />;
 }

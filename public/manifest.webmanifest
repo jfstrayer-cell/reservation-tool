@@ -3,7 +3,7 @@
   "short_name": "Réservations",
   "start_url": "/staff",
   "display": "standalone",
-  "background_color": "#faf8f5",
-  "theme_color": "#1f4e5f",
+  "background_color": "#ffffff",
+  "theme_color": "#111111",
   "lang": "fr-CA"
 }

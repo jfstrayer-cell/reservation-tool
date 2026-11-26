@@ -12,12 +12,20 @@ interface Booking {
   source: string;
   name: string | null;
   phone: string | null;
+  email: string | null;
   notes: string | null;
   tables: string[];
 }
 
-const LATE_AFTER_MIN = 15;
-const PARTY_SIZES = [1, 2, 3, 4, 5, 6];
+export interface StaffSettings {
+  timeZone: string;
+  restaurantName: string;
+  logo: string | null;
+  lateBadgeMinutes: number;
+  noShowPromptMinutes: number;
+  maxPartySize: number;
+  groupUrl: string | null;
+}
 
 function addDays(date: string, n: number): string {
   const d = new Date(`${date}T12:00:00Z`);
@@ -25,7 +33,9 @@ function addDays(date: string, n: number): string {
   return d.toISOString().slice(0, 10);
 }
 
-export default function StaffDay({ today, timeZone }: { today: string; timeZone: string }) {
+export default function StaffDay({ today, settings }: { today: string; settings: StaffSettings }) {
+  const { timeZone } = settings;
+  const sizes = Array.from({ length: settings.maxPartySize }, (_, i) => i + 1);
   const [date, setDate] = useState(today);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
@@ -82,6 +92,7 @@ export default function StaffDay({ today, timeZone }: { today: string; timeZone:
   return (
     <main className="wrap">
       <header className="top">
+        {settings.logo && <img className="logo" src={settings.logo} alt={settings.restaurantName} />}
         <div className="daynav">
           <button className="ghost" onClick={() => setDate(addDays(date, -1))} aria-label="Jour précédent">‹</button>
           <div className="day">
@@ -102,8 +113,18 @@ export default function StaffDay({ today, timeZone }: { today: string; timeZone:
         <button className="primary" onClick={() => setPanel(panel === "phone" ? "none" : "phone")}>+ Réservation tél.</button>
       </div>
 
-      {panel === "walkin" && <WalkIn onDone={() => { setPanel("none"); if (date !== today) setDate(today); else load(); }} onError={setError} />}
-      {panel === "phone" && <PhoneBooking date={date} time={time} onDone={() => { setPanel("none"); load(); }} onError={setError} />}
+      {panel === "walkin" && <WalkIn sizes={sizes} groupUrl={settings.groupUrl} onDone={() => { setPanel("none"); if (date !== today) setDate(today); else load(); }} onError={setError} />}
+      {panel === "phone" && (
+        <PhoneBooking
+          initialDate={date}
+          today={today}
+          sizes={sizes}
+          groupUrl={settings.groupUrl}
+          time={time}
+          onDone={(bookedDate) => { setPanel("none"); if (bookedDate !== date) setDate(bookedDate); else load(); }}
+          onError={setError}
+        />
+      )}
 
       {error && <div className="error" role="alert">{error}</div>}
       {loading && <p className="muted">Chargement…</p>}
@@ -111,9 +132,12 @@ export default function StaffDay({ today, timeZone }: { today: string; timeZone:
 
       <ul className="list">
         {active.map((b) => {
-          const late = (b.status === "confirmed" || b.status === "late") && now > new Date(b.start).getTime() + LATE_AFTER_MIN * 60_000;
+          const waiting = b.status === "confirmed" || b.status === "late";
+          const minutesLate = waiting ? Math.floor((now - new Date(b.start).getTime()) / 60_000) : 0;
+          const late = waiting && minutesLate >= settings.lateBadgeMinutes;
+          const askNoShow = waiting && minutesLate >= settings.noShowPromptMinutes;
           return (
-            <li key={b.id} className={`row ${b.status} ${late ? "is-late" : ""}`}>
+            <li key={b.id} className={`row ${b.status} ${late ? "is-late" : ""} ${askNoShow ? "ask-noshow" : ""}`}>
               <div className="when">{time.format(new Date(b.start))}</div>
               <div className="who">
                 <div className="name">
@@ -122,7 +146,9 @@ export default function StaffDay({ today, timeZone }: { today: string; timeZone:
                 </div>
                 <div className="meta">
                   {b.tables.join(" + ")}
-                  {b.phone && <> · <a href={`tel:${b.phone}`}>{b.phone}</a></>}
+                    {b.phone && <> · <a href={`tel:${b.phone}`}>{b.phone}</a></>}
+                  {!b.phone && b.email && <> · {b.email}</>}
+                  {!b.phone && !b.email && b.source === "phone" && " · sans coordonnées"}
                   {b.source === "online" && " · en ligne"}
                   {b.source === "phone" && " · tél."}
                 </div>
@@ -131,7 +157,8 @@ export default function StaffDay({ today, timeZone }: { today: string; timeZone:
               <div className="state">
                 {b.status === "seated" && <span className="badge seated">Arrivé</span>}
                 {b.status === "completed" && <span className="badge done">Parti</span>}
-                {late && <span className="badge late">En retard</span>}
+                {late && !askNoShow && <span className="badge late">En retard · {minutesLate} min</span>}
+                {askNoShow && <span className="badge noshow">Absent ? · {minutesLate} min</span>}
               </div>
               <div className="buttons">
                 {(b.status === "confirmed" || b.status === "late") && (
@@ -179,18 +206,30 @@ function TwoTap({ label, onConfirm }: { label: string; onConfirm: () => void }) 
   );
 }
 
-function PartyPicker({ value, onPick }: { value: number | null; onPick: (n: number) => void }) {
+function PartyPicker({ sizes, value, onPick, onGroup }: { sizes: number[]; value: number | null; onPick: (n: number) => void; onGroup: () => void }) {
   return (
     <div className="party-picker">
-      {PARTY_SIZES.map((n) => (
-        <button key={n} className={value === n ? "chip on" : "chip"} onClick={() => onPick(n)}>{n}</button>
+      {sizes.map((n) => (
+        <button type="button" key={n} className={value === n ? "chip on" : "chip"} onClick={() => onPick(n)}>{n}</button>
       ))}
+      <button type="button" className="chip group" onClick={onGroup}>{sizes.length + 1}+</button>
     </div>
   );
 }
 
-function WalkIn({ onDone, onError }: { onDone: () => void; onError: (m: string) => void }) {
+function GroupNotice({ groupUrl, max }: { groupUrl: string | null; max: number }) {
+  return (
+    <div className="group-notice">
+      <strong>Plus de {max} personnes :</strong> ces demandes vont à la salle privée du 552 Duluth, avec son protocole de groupes
+      (formules, estimé, termes et conditions).
+      {groupUrl && <> <a href={groupUrl} target="_blank" rel="noreferrer">Ouvrir la demande de groupe</a></>}
+    </div>
+  );
+}
+
+function WalkIn({ sizes, groupUrl, onDone, onError }: { sizes: number[]; groupUrl: string | null; onDone: () => void; onError: (m: string) => void }) {
   const [busy, setBusy] = useState(false);
+  const [group, setGroup] = useState(false);
   async function seat(partySize: number) {
     setBusy(true);
     const res = await fetch("/api/staff/bookings", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ source: "walk_in", partySize }) });
@@ -202,17 +241,24 @@ function WalkIn({ onDone, onError }: { onDone: () => void; onError: (m: string) 
     <section className="panel">
       <h2>Sans réservation — combien de personnes ?</h2>
       <p className="muted">Un toucher : la meilleure table libre est attribuée et le client est noté comme arrivé.</p>
-      <fieldset disabled={busy}><PartyPicker value={null} onPick={seat} /></fieldset>
+      <fieldset disabled={busy}><PartyPicker sizes={sizes} value={null} onPick={seat} onGroup={() => setGroup(true)} /></fieldset>
+      {group && <GroupNotice groupUrl={groupUrl} max={sizes.length} />}
     </section>
   );
 }
 
-function PhoneBooking({ date, time, onDone, onError }: { date: string; time: Intl.DateTimeFormat; onDone: () => void; onError: (m: string) => void }) {
+function PhoneBooking({ initialDate, today, sizes, groupUrl, time, onDone, onError }: {
+  initialDate: string; today: string; sizes: number[]; groupUrl: string | null; time: Intl.DateTimeFormat;
+  onDone: (date: string) => void; onError: (m: string) => void;
+}) {
+  const [date, setDate] = useState(initialDate < today ? today : initialDate);
   const [party, setParty] = useState<number | null>(null);
+  const [group, setGroup] = useState(false);
   const [times, setTimes] = useState<{ start: string; tables: string[] }[] | null>(null);
   const [start, setStart] = useState<string | null>(null);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
   const [notes, setNotes] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -233,18 +279,21 @@ function PhoneBooking({ date, time, onDone, onError }: { date: string; time: Int
     const res = await fetch("/api/staff/bookings", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ source: "phone", partySize: party, start, name, phone, notes }),
+      body: JSON.stringify({ source: "phone", partySize: party, start, name, phone, email, notes }),
     });
     setBusy(false);
     if (!res.ok) return onError((await res.json().catch(() => ({}))).message ?? "Erreur");
-    onDone();
+    onDone(date);
   }
 
   return (
     <form className="panel" onSubmit={save}>
       <h2>Réservation par téléphone</h2>
+      <label className="step" htmlFor="booking-date">Date</label>
+      <input id="booking-date" type="date" className="date" min={today} value={date} onChange={(e) => e.target.value && setDate(e.target.value)} />
       <label className="step">Personnes</label>
-      <PartyPicker value={party} onPick={setParty} />
+      <PartyPicker sizes={sizes} value={party} onPick={(n) => { setGroup(false); setParty(n); }} onGroup={() => { setParty(null); setGroup(true); }} />
+      {group && <GroupNotice groupUrl={groupUrl} max={sizes.length} />}
       {party && (
         <>
           <label className="step">Heure</label>
@@ -261,8 +310,10 @@ function PhoneBooking({ date, time, onDone, onError }: { date: string; time: Int
       )}
       {start && (
         <div className="fields">
-          <input autoFocus required placeholder="Nom" value={name} onChange={(e) => setName(e.target.value)} autoComplete="off" />
-          <input required placeholder="Téléphone" inputMode="tel" value={phone} onChange={(e) => setPhone(e.target.value)} autoComplete="off" />
+          <input autoFocus required placeholder="Nom ou prénom" value={name} onChange={(e) => setName(e.target.value)} autoComplete="off" />
+          <input placeholder="Téléphone (facultatif)" inputMode="tel" value={phone} onChange={(e) => setPhone(e.target.value)} autoComplete="off" />
+          <input placeholder="Courriel (facultatif)" type="email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="off" />
+          {!phone && !email && <p className="hint">Sans téléphone ni courriel, le client ne recevra ni confirmation ni rappel.</p>}
           <input placeholder="Note (allergie, occasion…)" value={notes} onChange={(e) => setNotes(e.target.value)} autoComplete="off" />
           <button className="primary" type="submit" disabled={busy}>{busy ? "Enregistrement…" : "Enregistrer"}</button>
         </div>

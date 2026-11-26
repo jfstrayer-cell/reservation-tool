@@ -26,7 +26,9 @@ export interface RestaurantSettings {
   slotIntervalMinutes: number;
   bufferMinutes: number;
   onlineCutoffMinutes: number;
-  lateGraceMinutes: number;
+  lateBadgeMinutes: number;     // "En retard" shown after this many minutes
+  noShowPromptMinutes: number;  // staff asked "Absent ?" after this many minutes; never automatic
+  largerPartiesRedirect?: { type: "group_request"; minPartySize: number; url: string | null; fallbackEmail?: string };
   pacingLimitPer15Min: number | null;
   remindersHoursBefore: number[];
   reviewRequestHoursAfter: number;
@@ -40,6 +42,7 @@ export interface RestaurantConfig {
   combinations: CombinationConfig[];
   turnTimeMinutes: { default: number; bySize?: Record<string, number> };
   settings: RestaurantSettings;
+  brand?: { logo?: string; fontHeading?: string; colorInk?: string; colorText?: string; colorBackground?: string };
 }
 
 export function turnTimeFor(config: RestaurantConfig, partySize: number): number {

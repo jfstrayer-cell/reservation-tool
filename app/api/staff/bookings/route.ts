@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
         partySize,
         start: new Date(),
         source: "walk_in",
-        guest: body.name && body.phone ? { name: String(body.name), phone: String(body.phone) } : undefined,
+        guest: typeof body.name === "string" && body.name.trim() ? { name: body.name.trim().slice(0, 120) } : undefined,
         actor: "staff",
       });
       await setPresence(getPool(), r.id, created.id, "seated", "staff");
@@ -26,20 +26,24 @@ export async function POST(req: NextRequest) {
     }
 
     if (body.source !== "phone") return fail(400, "bad_source", "Type de réservation invalide");
-    const name = typeof body.name === "string" ? body.name.trim() : "";
-    const phone = typeof body.phone === "string" ? body.phone.trim() : "";
+    const text = (v: unknown, max: number) => (typeof v === "string" ? v.trim().slice(0, max) : "");
+    const name = text(body.name, 120);
+    const phone = text(body.phone, 40);
+    const email = text(body.email, 200).toLowerCase();
     const start = new Date(body.start);
-    if (!name) return fail(400, "missing_name", "Nom requis");
-    if (!phone) return fail(400, "missing_phone", "Téléphone requis");
+    if (!name) return fail(400, "missing_name", "Un nom ou un prénom suffit, mais il est requis");
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return fail(400, "bad_email", "Courriel invalide");
     if (Number.isNaN(start.getTime())) return fail(400, "bad_time", "Heure invalide");
+    const groupFrom = r.config.settings.largerPartiesRedirect?.minPartySize ?? 11;
+    if (partySize >= groupFrom) return fail(400, "group_request", "Groupe de plus de 10 : salle privée du 552, formulaire de groupe");
 
     const created = await createBooking(getPool(), r.config, {
       restaurantId: r.id,
       partySize,
       start,
       source: "phone",
-      guest: { name, phone, language: body.language ?? undefined },
-      notes: typeof body.notes === "string" && body.notes.trim() ? body.notes.trim() : undefined,
+      guest: { name, phone: phone || undefined, email: email || undefined, language: body.language ?? undefined },
+      notes: text(body.notes, 500) || undefined,
       actor: "staff",
     });
     return json({ booking: created }, 201);
