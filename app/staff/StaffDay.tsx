@@ -103,6 +103,7 @@ export default function StaffDay({ today, settings }: { today: string; settings:
           </div>
           <button className="ghost" onClick={() => setDate(addDays(date, 1))} aria-label="Jour suivant">›</button>
         </div>
+        <a className="groups-link" href="/staff/groupes">Demandes de groupe ›</a>
         <div className="totals">
           {active.length} réservation{active.length > 1 ? "s" : ""} · {covers} couvert{covers > 1 ? "s" : ""}
         </div>
@@ -220,9 +221,7 @@ function PartyPicker({ sizes, value, onPick, onGroup }: { sizes: number[]; value
 function GroupNotice({ groupUrl, max }: { groupUrl: string | null; max: number }) {
   return (
     <div className="group-notice">
-      <strong>Plus de {max} personnes :</strong> ces demandes vont à la salle privée du 552 Duluth, avec son protocole de groupes
-      (formules, estimé, termes et conditions).
-      {groupUrl && <> <a href={groupUrl} target="_blank" rel="noreferrer">Ouvrir la demande de groupe</a></>}
+      Groupes de plus de {max} personnes : {groupUrl ? <a href={groupUrl} target="_blank" rel="noreferrer">demande de groupe</a> : "demande de groupe"}
     </div>
   );
 }

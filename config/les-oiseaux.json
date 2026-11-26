@@ -175,9 +175,9 @@
     "largerPartiesRedirect": {
       "type": "group_request",
       "minPartySize": 11,
-      "url": null,
+      "url": "/groupes",
       "fallbackEmail": "info@lesoiseaux.ca",
-      "_note": "11+ guests: private room at 552 Duluth through the groups workflow; url = dedicated group request form once it exists"
+      "_note": "11+ guests: group request form for the private room at 552 Duluth"
     },
     "lateBadgeMinutes": 15,
     "noShowPromptMinutes": 60
