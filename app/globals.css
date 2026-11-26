@@ -19,7 +19,9 @@ a { color: var(--accent); }
 .day strong::first-letter { text-transform: uppercase; }
 .day .link { display: block; margin: 2px auto 0; border: 0; background: none; color: var(--accent); min-height: 0; padding: 2px; font-size: .9rem; }
 .totals { text-align: center; color: var(--muted); margin-top: 4px; }
-.actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 12px 0; }
+.actions { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin: 12px 0; }
+.as-button { display: flex; align-items: center; justify-content: center; text-decoration: none; min-height: 44px; padding: 10px 14px; }
+@media (max-width: 600px) { .actions { grid-template-columns: 1fr 1fr; } .actions .as-button { grid-column: 1 / -1; } }
 .primary { background: var(--accent); color: #fff; border-color: var(--accent); font-family: var(--serif); text-transform: uppercase; letter-spacing: .06em; border-radius: 999px; }
 .ghost { background: transparent; }
 .ok { background: var(--ok); color: #fff; border-color: var(--ok); font-weight: 600; }
@@ -108,3 +110,4 @@ input.date { max-width: 220px; }
 .row.g-req { display: block; }
 .row.g-req .buttons { margin-top: 10px; align-items: center; }
 .row.g-req .buttons button { flex: none; }
+.as-chip { display: inline-flex; align-items: center; justify-content: center; text-decoration: none; color: var(--ink); border: 1px dashed var(--line); border-radius: 10px; min-height: 44px; padding: 10px 14px; font-weight: 600; }

@@ -6,10 +6,10 @@ interface Req {
   id: string; registreId: string; status: string; eventDate: string; alternateDate: string | null; arrivalTime: string | null;
   guestsMin: number; guestsMax: number; occasion: string | null; eventFormat: string; drinks: string; options: string[];
   dietaryNotes: string | null; message: string | null; contactName: string; organisation: string | null; email: string;
-  phone: string | null; createdAt: string;
+  phone: string | null; source: string; createdAt: string;
 }
 
-const FORMAT: Record<string, string> = { souper: "Souper servi à table", cocktail: "Cocktail dînatoire", autre: "Autre" };
+const FORMAT: Record<string, string> = { souper: "Souper servi à table", cocktail: "Cocktail dînatoire", traiteur: "Traiteur externe", concert: "Concert", autre: "Autre" };
 const DRINKS: Record<string, string> = { apportez: "Apportez votre vin", service: "Service du vin", a_discuter: "Boissons à discuter" };
 const OPTIONS: Record<string, string> = { gateau: "gâteau", musiciens: "musique", decoration: "décoration", ecran: "écran/karaoké", verres: "verres", plan_de_table: "plan de table" };
 const fmtDate = (d: string) => new Intl.DateTimeFormat("fr-CA", { timeZone: "UTC", weekday: "long", day: "numeric", month: "long", year: "numeric" }).format(new Date(`${d}T12:00:00Z`));
@@ -41,7 +41,7 @@ export default function GroupRequests() {
       <header className="top">
         <img className="logo" src="/brand/les-oiseaux.svg" alt="Les Oiseaux de Passage" />
         <div className="daynav"><a className="ghost back" href="/staff">‹ Réservations</a><div className="day"><strong>Demandes de groupe</strong></div><span /></div>
-        <p className="totals">Salle privée du 552 · réponse complète visée en 48 h</p>
+        <p className="totals">Salle privée du 552 · réponse complète visée en 48 h · <a href="/staff/groupes/nouvelle">+ Nouvelle demande</a></p>
       </header>
       {error && <div className="error">{error}</div>}
       {items === null && <p className="muted">Chargement…</p>}
@@ -60,7 +60,12 @@ export default function GroupRequests() {
                   {r.alternateDate && ` · rechange : ${fmtDate(r.alternateDate)}`}
                 </div>
                 <div className="meta">{FORMAT[r.eventFormat]} · {DRINKS[r.drinks]}{r.options.length > 0 && ` · ${r.options.map((o) => OPTIONS[o] ?? o).join(", ")}`}{r.occasion && ` · ${r.occasion}`}</div>
-                <div className="meta"><a href={`mailto:${r.email}`}>{r.email}</a>{r.phone && <> · <a href={`tel:${r.phone}`}>{r.phone}</a></>} · Registre : {r.registreId}</div>
+                <div className="meta">
+                  {r.email && <a href={`mailto:${r.email}`}>{r.email}</a>}
+                  {r.email && r.phone && " · "}
+                  {r.phone && <a href={`tel:${r.phone}`}>{r.phone}</a>}
+                  {" · "}Registre : {r.registreId}{r.source !== "formulaire web" && ` · ${r.source}`}
+                </div>
                 {r.dietaryNotes && <div className="notes">Allergies : {r.dietaryNotes}</div>}
                 {r.message && <div className="notes">{r.message}</div>}
               </div>
