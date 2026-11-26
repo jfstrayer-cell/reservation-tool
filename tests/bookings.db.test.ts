@@ -119,4 +119,11 @@ describe.skipIf(!url)("bookings in the database", () => {
     await expect(setPresence(pool, restaurantId, early.id, "seated", "staff")).rejects.toThrow(); // already closed
     void late;
   });
+
+  it("a phone booking needs only a name", async () => {
+    const b = await createBooking(pool, config, { restaurantId, partySize: 2, start: at(`${FRIDAY}T21:00`), source: "phone", guest: { name: "Sophie" } });
+    const { rows } = await pool.query("SELECT g.name, g.phone, g.email FROM booking b JOIN guest g ON g.id = b.guest_id WHERE b.id = $1", [b.id]);
+    expect(rows[0]).toEqual({ name: "Sophie", phone: null, email: null });
+    await expect(pool.query("INSERT INTO guest (restaurant_id, name) VALUES ($1, '  ')", [restaurantId])).rejects.toThrow();
+  });
 });

@@ -52,8 +52,17 @@ describe("start times", () => {
 });
 
 describe("party size and table choice", () => {
-  it("7 or more online goes to the group request", () => {
-    expect(findSlots(config, FRIDAY, 7, [], LONG_BEFORE)).toEqual({ kind: "group_request", reason: "party_too_large" });
+  it("11 or more online goes to the group request (private room at 552)", () => {
+    expect(findSlots(config, FRIDAY, 11, [], LONG_BEFORE)).toEqual({ kind: "group_request", reason: "party_too_large" });
+  });
+
+  it("parties of 7 to 10 get A6 to A10 pushed together", () => {
+    for (const n of [7, 8, 10]) expect(slots(FRIDAY, n)[0].tables).toEqual(["A6", "A7", "A8", "A9", "A10"]);
+  });
+
+  it("a party of 10 has no time when A9 is taken", () => {
+    const holds: Hold[] = [{ table: "A9", start: at(`${FRIDAY}T17:00`), heldUntil: at(`${FRIDAY}T23:00`) }];
+    expect(slots(FRIDAY, 10, holds)).toEqual([]);
   });
 
   it("a party of 2 gets a single table, starting with A3, which can't be combined anyway", () => {
@@ -75,9 +84,9 @@ describe("party size and table choice", () => {
     expect(slots(FRIDAY, 4, holds)[0].tables).toEqual(["A4", "A5"]);
   });
 
-  it("tables shared by several combinations (A6–A8) are kept for parties that need them", () => {
+  it("tables shared by several combinations (A6–A10) are kept for the parties that need them", () => {
     const busy = ["A1", "A2", "A4", "A5"].map((table) => ({ table, start: at(`${FRIDAY}T17:00`), heldUntil: at(`${FRIDAY}T23:00`) }));
-    expect(slots(FRIDAY, 4, busy)[0].tables).toEqual(["A9", "A10"]);
+    expect(slots(FRIDAY, 4, busy)[0].tables).toEqual(["A11", "A12"]);
   });
 
   it("a party of 6 has no time when A7 is taken", () => {

@@ -145,17 +145,27 @@
       ],
       "minSeats": 3,
       "maxSeats": 4
+    },
+    {
+      "tables": [
+        "A6",
+        "A7",
+        "A8",
+        "A9",
+        "A10"
+      ],
+      "minSeats": 7,
+      "maxSeats": 10
     }
   ],
   "turnTimeMinutes": {
     "default": 150
   },
   "settings": {
-    "maxPartySizeOnline": 6,
+    "maxPartySizeOnline": 10,
     "slotIntervalMinutes": 15,
     "bufferMinutes": 10,
     "onlineCutoffMinutes": 30,
-    "lateGraceMinutes": 15,
     "pacingLimitPer15Min": null,
     "remindersHoursBefore": [
       24,
@@ -164,7 +174,19 @@
     "reviewRequestHoursAfter": 2,
     "largerPartiesRedirect": {
       "type": "group_request",
-      "_note": "7+ guests: guest page shows the group request option (private room 552 / groups workflow) instead of times"
-    }
+      "minPartySize": 11,
+      "url": null,
+      "fallbackEmail": "info@lesoiseaux.ca",
+      "_note": "11+ guests: private room at 552 Duluth through the groups workflow; url = dedicated group request form once it exists"
+    },
+    "lateBadgeMinutes": 15,
+    "noShowPromptMinutes": 60
+  },
+  "brand": {
+    "logo": "/brand/les-oiseaux.svg",
+    "fontHeading": "GFS Didot",
+    "colorInk": "#111111",
+    "colorText": "#363636",
+    "colorBackground": "#ffffff"
   }
 }

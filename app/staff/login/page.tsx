@@ -18,6 +18,7 @@ export default function Login() {
 
   return (
     <main className="wrap login">
+      <img className="logo" src="/brand/les-oiseaux.svg" alt="Les Oiseaux de Passage" />
       <h1>Réservations</h1>
       <p className="muted">Entrez le code de l’équipe. Cet appareil restera connecté 30 jours.</p>
       <form onSubmit={submit}>
